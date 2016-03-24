@@ -14,8 +14,8 @@ exports.serveAssets = function(res, asset, contentType) {
   // Write some code here that helps serve up your static files!
   // (Static files are things like html (yours or archived from others...),
   // css, or anything that doesn't change often.)
-  
-  fs.readFileAsync( path.join(__dirname, asset), 'utf8' )
+
+  fs.readFileAsync(asset, 'utf8' )
     .then(function(fileData) {
        // set status code
       headers['content-type'] = contentType;
