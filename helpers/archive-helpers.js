@@ -85,7 +85,10 @@ var getHtmlAsync = function(url) {
     request('http://' + url, function(error, response, body) {
 
       if (!error && response.statusCode === 200) {
-        resolve(body);
+        resolve({
+          'url': url,
+          'body': body
+        });
       }
       if (error) {
         reject(error);
@@ -101,31 +104,47 @@ exports.downloadUrls = downloadUrls = function(urls) {
 
   // where does this array come from?
     // the caller needs to have read from sites.txt, made it an array, and passed it in to this
-  var url = urls[0];
-  
-  getHtmlAsync(url)
-    .then(function(body) {
-      console.log('INSIDE downloadUrls success: ' + body);
 
-      // write to sites.txt
-       // append the url value to archive.paths.list file
-      fs.writeFileAsync(path.join(paths.archivedSites, url), body, 'utf8')
-        .then(function () {
-          console.log("WE WROTE IT!!!!! IT BEING URL = " + url);
-          // return result;
-        })
-        .catch( function(err) {
-          console.log('FAILED TO WRITE IN DOWNLOADURLS = ' + err);
-          console.log(err.stack);
-        }
-      );
+  Promise.all(urls.map(function(url) {
+    return getHtmlAsync(url);
+  })).then(function(responses) {
+    
+    responses.forEach(function(response) {
+      console.log('url: ', response['url']);
+      console.log('whole response obj: ', JSON.stringify(response));
+      fs.writeFileAsync(path.join(paths.archivedSites, response.url), response.body, 'utf8'); 
 
-
-
-    })
-    .catch(function(err) {
-      console.log('INSIDE downloadUrls ERROR: ' + err);
     });
+
+  }).catch( function(err) {
+    console.log('FAILED TO WRITE IN DOWNLOADURLS = ' + err);
+    console.log(err.stack);
+  });
+
+  // var url = urls[0];
+  // getHtmlAsync(url)
+  //   .then(function(body) {
+  //     console.log('INSIDE downloadUrls success: ' + body);
+
+  //     // write to sites.txt
+  //      // append the url value to archive.paths.list file
+  //     fs.writeFileAsync(path.join(paths.archivedSites, url), body, 'utf8')
+  //       .then(function () {
+  //         console.log("WE WROTE IT!!!!! IT BEING URL = " + url);
+  //         // return result;
+  //       })
+  //       .catch( function(err) {
+  //         console.log('FAILED TO WRITE IN DOWNLOADURLS = ' + err);
+  //         console.log(err.stack);
+  //       }
+  //     );
+
+
+
+  //   })
+  //   .catch(function(err) {
+  //     console.log('INSIDE downloadUrls ERROR: ' + err);
+  //   });
 
 
   // for each url 
