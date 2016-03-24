@@ -34,6 +34,17 @@ exports.handleRequest = function (req, res) {
         });
       // do response.end sending it down
 
+    } else if ( /.css$/.test(urlObj.pathname) ) {
+      fs.readFileAsync( path.join(__dirname, '/public/styles.css'), 'utf8' )
+        .then(function(fileData) {
+           // set status code
+          res.writeHead(200, {'content-type': 'text/css'});
+          res.end(fileData);
+        })
+        .catch(function(err) {
+          res.writeHead(404, headers);
+          res.end('<!DOCTYPE html><html><body>Oops!!</body></html>');  
+        });
     } else {
       res.writeHead(404, headers);
       res.end(archive.paths.list);
