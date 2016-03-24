@@ -2,6 +2,7 @@ var path = require('path');
 var archive = require('../helpers/archive-helpers');
 var url = require('url');
 var Promise = require('bluebird');
+var serveAssets = require('./http-helpers');
 // require more modules/folders here!
 var fs = require('fs');
 Promise.promisifyAll(fs);
@@ -20,32 +21,21 @@ exports.handleRequest = function (req, res) {
   if (req.method === 'GET') {
     if (urlObj.pathname === '/') {
 
-      
-      // read input.html file using a promise
-      fs.readFileAsync( path.join(__dirname, '/public/index.html'), 'utf8' )
-        .then(function(fileData) {
-           // set status code
-          res.writeHead(200, headers);
-          res.end(fileData);
-        })
-        .catch(function(err) {
-          res.writeHead(404, headers);
-          res.end('<!DOCTYPE html><html><body>Oops!!</body></html>');  
-        });
       // do response.end sending it down
+      serveAssets.serveAssets(res, '/public/index.html', 'text/html');
 
     } else if ( /.css$/.test(urlObj.pathname) ) {
-      fs.readFileAsync( path.join(__dirname, '/public/styles.css'), 'utf8' )
-        .then(function(fileData) {
-           // set status code
-          res.writeHead(200, {'content-type': 'text/css'});
-          res.end(fileData);
-        })
-        .catch(function(err) {
-          res.writeHead(404, headers);
-          res.end('<!DOCTYPE html><html><body>Oops!!</body></html>');  
-        });
+      console.log('getting css: ' + urlObj.pathname);
+      serveAssets.serveAssets(res, '/public' + urlObj.pathname, 'text/css');
     } else {
+
+      // search for file that is the end of pathname
+      // fs.readFileAsync( path.join(__dirname, '../' ))
+      // if found, return contents
+
+      // else, return 404
+
+
       res.writeHead(404, headers);
       res.end(archive.paths.list);
 
