@@ -5,7 +5,7 @@ var Promise = require('bluebird');
 Promise.promisifyAll(fs);
 
 
-var http = require('http');
+var request = require('request');
 
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
@@ -82,27 +82,23 @@ var getHtmlAsync = function(url) {
 
   var promise = new Promise( function(resolve, reject) {
 
-    var options = {
-      'protocol': 'http:',
-      'hostname': url,
-      'method': 'GET',
-      'path': '/'
-    };
+    // var options = {
+    //   'protocol': 'http:',
+    //   'hostname': url,
+    //   'method': 'GET',
+    //   'path': '/'
+    // };
 
-    var request = http.get(options, function(res) {
+    request('http://' + url, function(error, response, body) {
 
-      var body = '';
-      res.on('data', function(data) {
-        body += data;
-      });
-
-      res.on('end', function() {
+      if (!error && response.statusCode === 200) {
         resolve(body);
-      });
-    });
+      }
 
-    request.on('error', function(err) {
-      reject(err);
+      if (error) {
+        reject(error);
+      }
+
     });
 
   });
@@ -123,7 +119,7 @@ exports.downloadUrls = downloadUrls = function(urls) {
       console.log('INSIDE downloadUrls success: ' + body);
 
       // write to sites.txt
-      
+
 
     })
     .catch(function(err) {
