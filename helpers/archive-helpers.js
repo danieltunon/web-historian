@@ -27,18 +27,21 @@ exports.initialize = function(pathsObj) {
 // The following function names are provided to you to suggest how you might
 // modularize your code. Keep it clean!
 
-exports.readListOfUrls = function(callback) {
-  // generate array of urls from site.txt
-  
+exports.readListOfUrls = readListOfUrls = function(callback) {
+  // generate array of urls from reading data out of site.txt
   fs.readFileAsync(paths.list, 'utf8')
     .then(function(fileData) {
+      // call the callback function passing in array
       callback(fileData.trim().split('\n'));
     });
-  // call the callback function passing in array
-
 };
 
-exports.isUrlInList = function() {
+exports.isUrlInList = function(url, callback) {
+
+  readListOfUrls(function(urls) {
+    callback(urls.indexOf(url) !== -1);
+  });
+
 };
 
 exports.addUrlToList = function(url) {
