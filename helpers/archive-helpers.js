@@ -9,7 +9,7 @@ var _ = require('underscore');
  * customize it in any way you wish.
  */
 
-exports.paths = {
+exports.paths = paths = {
   siteAssets: path.join(__dirname, '../web/public'),
   archivedSites: path.join(__dirname, '../archives/sites'),
   list: path.join(__dirname, '../archives/sites.txt')
@@ -31,7 +31,15 @@ exports.readListOfUrls = function() {
 exports.isUrlInList = function() {
 };
 
-exports.addUrlToList = function() {
+exports.addUrlToList = function(url) {
+
+  // append the url value to archive.paths.list file
+  fs.appendFileAsync(paths.list, url + '\n', 'utf8')
+    .catch( function(err) {
+      console.log('FAILED TO APPEND TO SITES.TXT = ' + err);
+    }
+  );
+
 };
 
 exports.isUrlArchived = function() {

@@ -8,17 +8,9 @@ var fs = require('fs');
 Promise.promisifyAll(fs);
 
 exports.handleRequest = function (req, res) {
-  console.log('request: ' + req.url);
 
   var urlObj = url.parse(req.url, true);
   var requestedPath = urlObj.pathname;
-
-  // set headers
-  var headers = {
-    'content-type': 'text/html'
-  };
-    // content-type
-    // encoding
 
   if (req.method === 'GET') {
     if (requestedPath === '/') {
@@ -34,18 +26,35 @@ exports.handleRequest = function (req, res) {
     } else {
 
       // search for file that is the end of pathname
-
       serveAssets.serveAssets(res, path.join(archive.paths.archivedSites, requestedPath), 'text/html');
-      // fs.readFileAsync( path.join(__dirname, '../' ))
-      // if found, return contents
-
-      // else, return 404
-
-
-      // res.writeHead(404, headers);
-      // res.end(archive.paths.list);
-
     }
+  } else if (req.method === 'POST') {
+    // need to 
+    var requestBody = '';
+
+    req.on('data', function(data) {
+      requestBody += data;
+    });
+
+    req.on('end', function() {
+      // retrieve the url value out of requestBody
+      
+
+      // check if it is archived already
+         // if yes, redirect to archive
+
+      // if not archived, check if its in the list (sites.txt)
+
+         // if it is, redirect to loading page
+      // if it is not, add it to sites.txt and redirect to loading page
+
+      archive.addUrlToList(requestBody.slice(4));
+      res.writeHead(302, serveAssets.headers);
+      res.end('weeeeeeee');
+
+
+    });
+
   } else {
     res.writeHead(404, headers);
     res.end(archive.paths.list);
