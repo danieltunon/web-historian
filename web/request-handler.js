@@ -1,11 +1,9 @@
 var path = require('path');
 var archive = require('../helpers/archive-helpers');
 var url = require('url');
-var Promise = require('bluebird');
+
 var serveAssets = require('./http-helpers');
 // require more modules/folders here!
-var fs = require('fs');
-Promise.promisifyAll(fs);
 
 exports.handleRequest = function (req, res) {
 
