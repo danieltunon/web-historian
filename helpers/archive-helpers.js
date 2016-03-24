@@ -4,6 +4,9 @@ var _ = require('underscore');
 var Promise = require('bluebird');
 Promise.promisifyAll(fs);
 
+
+var http = require('http');
+
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
  * Consider using the `paths` object below to store frequently used file paths. This way,
@@ -32,11 +35,11 @@ exports.readListOfUrls = readListOfUrls = function(callback) {
   fs.readFileAsync(paths.list, 'utf8')
     .then(function(fileData) {
       // call the callback function passing in array
-      callback(fileData.trim().split('\n'));
+      return callback(fileData.trim().split('\n'));
     });
 };
 
-exports.isUrlInList = function(url, callback) {
+exports.isUrlInList = isUrlInList = function(url, callback) {
 
   readListOfUrls(function(urls) {
     callback(urls.indexOf(url) !== -1);
@@ -44,19 +47,96 @@ exports.isUrlInList = function(url, callback) {
 
 };
 
-exports.addUrlToList = function(url) {
+// TODO: walk through test for addUrlToList to find where the catch is occurring!!!
+
+exports.addUrlToList = addUrlToList = function(url, callback) {
 
   // append the url value to archive.paths.list file
   fs.appendFileAsync(paths.list, url + '\n', 'utf8')
+    .then(function () {
+      callback();
+      // return result;
+    })
     .catch( function(err) {
       console.log('FAILED TO APPEND TO SITES.TXT = ' + err);
+      console.log(err.stack);
     }
   );
 
 };
 
-exports.isUrlArchived = function() {
+exports.isUrlArchived = function(url, callback) {
+  // store array of files inside the sites dir 
+  fs.readdirAsync(paths.archivedSites)
+    .then(function(sitesDir) {
+    // use index of to check if url is present
+      return callback(sitesDir.indexOf(url) !== -1 );
+    })
+    .catch( function(err) {
+      console.log('ERROR SEARCHING DIR URL ARCHIVES ' + err);
+    }
+  );
 };
 
-exports.downloadUrls = function() {
+var getHtmlAsync = function(url) {
+
+  var promise = new Promise( function(resolve, reject) {
+
+    var options = {
+      'protocol': 'http:',
+      'hostname': url,
+      'method': 'GET',
+      'path': '/'
+    };
+
+    var request = http.get(options, function(res) {
+
+      var body = '';
+      res.on('data', function(data) {
+        body += data;
+      });
+
+      res.on('end', function() {
+        resolve(body);
+      });
+    });
+
+    request.on('error', function(err) {
+      reject(err);
+    });
+
+  });
+
+  return promise;
+
 };
+
+exports.downloadUrls = downloadUrls = function(urls) {
+  // taking in an array of urls 
+
+  // where does this array come from?
+    // the caller needs to have read from sites.txt, made it an array, and passed it in to this
+ 
+  
+  getHtmlAsync(urls[0])
+    .then(function(body) {
+      console.log('INSIDE downloadUrls success: ' + body);
+
+      // write to sites.txt
+      
+
+    })
+    .catch(function(err) {
+      console.log('INSIDE downloadUrls ERROR: ' + err);
+    });
+
+
+  // for each url 
+    // to a get request on it
+    // write a file into the archive/sites directory with the results of the get
+
+
+};
+
+
+
