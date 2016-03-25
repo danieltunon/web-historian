@@ -2,10 +2,8 @@ var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
 var Promise = require('bluebird');
+var httpHelper = require('../web/http-helpers');
 Promise.promisifyAll(fs);
-
-
-var request = require('request');
 
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
@@ -55,7 +53,6 @@ exports.addUrlToList = addUrlToList = function(url, callback) {
   fs.appendFileAsync(paths.list, url + '\n', 'utf8')
     .then(function () {
       callback();
-      // return result;
     })
     .catch( function(err) {
       console.log('FAILED TO APPEND TO SITES.TXT = ' + err);
@@ -78,80 +75,18 @@ exports.isUrlArchived = function(url, callback) {
   );
 };
 
-var getHtmlAsync = function(url) {
-
-  var promise = new Promise( function(resolve, reject) {
-
-    request('http://' + url, function(error, response, body) {
-
-      if (!error && response.statusCode === 200) {
-        resolve({
-          'url': url,
-          'body': body
-        });
-      }
-      if (error) {
-        reject(error);
-      }
-    });
-  });
-
-  return promise;
-};
-
 exports.downloadUrls = downloadUrls = function(urls) {
-  // taking in an array of urls 
-
-  // where does this array come from?
-    // the caller needs to have read from sites.txt, made it an array, and passed it in to this
 
   Promise.all(urls.map(function(url) {
-    return getHtmlAsync(url);
+    return httpHelper.getHtmlAsync(url);
   })).then(function(responses) {
-    
     responses.forEach(function(response) {
-      console.log('url: ', response['url']);
-      console.log('whole response obj: ', JSON.stringify(response));
       fs.writeFileAsync(path.join(paths.archivedSites, response.url), response.body, 'utf8'); 
-
     });
-
   }).catch( function(err) {
     console.log('FAILED TO WRITE IN DOWNLOADURLS = ' + err);
     console.log(err.stack);
   });
-
-  // var url = urls[0];
-  // getHtmlAsync(url)
-  //   .then(function(body) {
-  //     console.log('INSIDE downloadUrls success: ' + body);
-
-  //     // write to sites.txt
-  //      // append the url value to archive.paths.list file
-  //     fs.writeFileAsync(path.join(paths.archivedSites, url), body, 'utf8')
-  //       .then(function () {
-  //         console.log("WE WROTE IT!!!!! IT BEING URL = " + url);
-  //         // return result;
-  //       })
-  //       .catch( function(err) {
-  //         console.log('FAILED TO WRITE IN DOWNLOADURLS = ' + err);
-  //         console.log(err.stack);
-  //       }
-  //     );
-
-
-
-  //   })
-  //   .catch(function(err) {
-  //     console.log('INSIDE downloadUrls ERROR: ' + err);
-  //   });
-
-
-  // for each url 
-    // to a get request on it
-    // write a file into the archive/sites directory with the results of the get
-
-
 };
 
 

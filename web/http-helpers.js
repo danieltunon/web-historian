@@ -2,6 +2,7 @@ var path = require('path');
 var fs = require('fs');
 var archive = require('../helpers/archive-helpers');
 var Promise = require('bluebird');
+var request = require('request');
 Promise.promisifyAll(fs);
 
 exports.headers = headers = {
@@ -28,6 +29,22 @@ exports.serveAssets = function(res, asset, contentType) {
       res.writeHead(404, headers);
       res.end('<!DOCTYPE html><html><body>Oops!!</body></html>');  
     });
+};
+
+exports.getHtmlAsync = function(url) {
+
+  return new Promise( function(resolve, reject) {
+    request('http://' + url, function(error, response, body) {
+      if (!error && response.statusCode === 200) {
+        resolve({
+          'url': url,
+          'body': body
+        });
+      } else if (error) {
+        reject(error);
+      }
+    });
+  });
 };
 
 
