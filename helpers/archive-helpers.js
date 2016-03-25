@@ -45,21 +45,15 @@ exports.isUrlInList = isUrlInList = function(url, callback) {
 
 };
 
-// TODO: walk through test for addUrlToList to find where the catch is occurring!!!
-
 exports.addUrlToList = addUrlToList = function(url, callback) {
-
   // append the url value to archive.paths.list file
   fs.appendFileAsync(paths.list, url + '\n', 'utf8')
     .then(function () {
       callback();
-    })
-    .catch( function(err) {
+    }).catch( function(err) {
       console.log('FAILED TO APPEND TO SITES.TXT = ' + err);
       console.log(err.stack);
-    }
-  );
-
+    });
 };
 
 exports.isUrlArchived = function(url, callback) {
@@ -71,8 +65,7 @@ exports.isUrlArchived = function(url, callback) {
     })
     .catch( function(err) {
       console.log('ERROR SEARCHING DIR URL ARCHIVES ' + err);
-    }
-  );
+    });
 };
 
 exports.downloadUrls = downloadUrls = function(urls) {
