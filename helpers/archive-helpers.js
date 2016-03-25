@@ -32,8 +32,19 @@ exports.readListOfUrls = readListOfUrls = function(callback) {
   // generate array of urls from reading data out of site.txt
   fs.readFileAsync(paths.list, 'utf8')
     .then(function(fileData) {
+
+      console.log('readListOfUrls: ' + fileData);
+
+      console.log('test: ' + JSON.stringify(fileData.trim().split('\n')));
+
+      var urlsArray = (fileData === '') ? [] : fileData.trim().split('\n');
+  
       // call the callback function passing in array
-      return callback(fileData.trim().split('\n'));
+      return callback(urlsArray);
+
+    })
+    .catch(function(err) {
+      console.log('Could not read sites.txt, err: ' + err);
     });
 };
 
@@ -74,9 +85,18 @@ exports.downloadUrls = downloadUrls = function(urls) {
     return httpHelper.getHtmlAsync(url);
   })).then(function(responses) {
     responses.forEach(function(response) {
-      fs.writeFileAsync(path.join(paths.archivedSites, response.url), response.body, 'utf8'); 
+      // this succesfully requested the url
+      return fs.writeFileAsync(path.join(paths.archivedSites, response.url), response.body, 'utf8'); 
     });
-  }).catch( function(err) {
+  })
+  .then(function() {
+    // clears our sites.txt
+
+
+    fs.writeFileAsync(paths.list, '', 'utf8');
+    
+  })
+  .catch( function(err) {
     console.log('FAILED TO WRITE IN DOWNLOADURLS = ' + err);
     console.log(err.stack);
   });

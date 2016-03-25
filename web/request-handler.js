@@ -16,6 +16,8 @@ exports.handleRequest = function (req, res) {
     } else if ( /.css$/.test(requestedPath) ) {
       console.log('getting css: ' + requestedPath);
       serveAssets.serveAssets(res, path.join(archive.paths.siteAssets, requestedPath), 'text/css');
+    } else if (requestedPath === '/loading') {
+      serveAssets.serveAssets(res, path.join(archive.paths.siteAssets, '/loading.html'), 'text/html');
     } else {
       // search for file that is the end of pathname
       serveAssets.serveAssets(res, path.join(archive.paths.archivedSites, requestedPath), 'text/html');
@@ -33,17 +35,32 @@ exports.handleRequest = function (req, res) {
       // retrieve the url value out of requestBody
       var requestedUrl = requestBody.slice(4);
       // check if it is archived already
-      archive.isUrlArchived(requestedUrl, function(found) {
-        if (found) {
+      archive.isUrlArchived(requestedUrl, function(isArchived) {
+        if (isArchived) {
           // if yes, redirect to archive
           res.writeHead(302, {'Location': 'http://127.0.0.1:3000/' + requestedUrl});
           res.end();
         } else {
           // if not archived, check if its in the list (sites.txt)
+
+          archive.isUrlInList(requestedUrl, function(isInList) {
             // if it is, redirect to loading page
-            // if it is not, add it to sites.txt and redirect to loading page
-          archive.addUrlToList(requestBody.slice(4));
-          res.end('weeeeeeee');
+            console.log('before conditional: ', isInList);
+
+            if (!isInList) {
+              console.log('before calling addUrlToList');
+              // if it is not, add it to sites.txt and redirect to loading page
+              archive.addUrlToList(requestedUrl, function() {
+                console.log('Inside addUrlToList callback');    
+              });
+            } 
+            
+            res.writeHead(302, {'Location': 'http://127.0.0.1:3000/loading'});
+            res.end();  
+            
+          });
+          
+          // res.end('weeeeeeee');
         }
       });
     });
