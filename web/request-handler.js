@@ -36,21 +36,23 @@ exports.handleRequest = function (req, res) {
 
     req.on('end', function() {
       // retrieve the url value out of requestBody
-      
+      var requestedUrl = requestBody.slice(4);
 
       // check if it is archived already
-         // if yes, redirect to archive
-
-      // if not archived, check if its in the list (sites.txt)
-
-         // if it is, redirect to loading page
-      // if it is not, add it to sites.txt and redirect to loading page
-
-      archive.addUrlToList(requestBody.slice(4));
-      res.writeHead(302, serveAssets.headers);
-      res.end('weeeeeeee');
-
-
+      archive.isUrlArchived(requestedUrl, function(found) {
+        
+        if (found) {
+          // if yes, redirect to archive
+          res.writeHead(302, {'Location': 'http://127.0.0.1:3000/' + requestedUrl});
+          res.end();
+        } else {
+          // if not archived, check if its in the list (sites.txt)
+            // if it is, redirect to loading page
+            // if it is not, add it to sites.txt and redirect to loading page
+          archive.addUrlToList(requestBody.slice(4));
+          res.end('weeeeeeee');
+        }
+      });
     });
 
   } else {
